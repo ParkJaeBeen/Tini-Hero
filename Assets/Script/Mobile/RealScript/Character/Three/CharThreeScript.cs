@@ -10,7 +10,6 @@ public class CharThreeScript : MonoBehaviour
     float _atkCoolTime, _healCoolTime, _ultCoolTime, _buffCoolTime;
     float _healCoolTimeText, _ultCoolTimeText, _buffCoolTimeText;
     float buffDuration;
-    Transform HealUI;
     Transform mmPos;
     GameObject ResourceMagicMissile, ResourceHealEffect, ResourceUltEffect, ResourceBuffEffect,
         instanceMagicMissile, instanceHealText, instanceHealEffect, instanceUltEffect, instanceBuffEffect;
@@ -19,10 +18,12 @@ public class CharThreeScript : MonoBehaviour
     Transform _HealTarget;
     int mobOP;
     int middleBossOP;
+    int BossOP;
     int ShockWaveD;
     TextMeshProUGUI damagePro;
     MobWeaponScript mobWeaponScript;
     MBHitScript mbHitScript;
+    BossHitScript bossHitScript;
     ShockWaveScript shockWaveScript;
     UltHealScript ultHealScript;
     Animator _CharThreeAni;
@@ -30,6 +31,9 @@ public class CharThreeScript : MonoBehaviour
     GameObject instanceStunText;
     bool StunTrigger;
     bool _healTrigger, _buffTrigger, _ultTrigger;
+    RedDragonScript redDragonScript;
+    int FlameOP;
+    private int meteorOP;
 
     public float moveSpeed
     {
@@ -92,8 +96,6 @@ public class CharThreeScript : MonoBehaviour
     }
     private void Awake()
     {
-        // 3번 힐러가 현재 조종하는 대상일 때 캔버스에 힐 UI를 켜기 위한 변수
-        HealUI = GameObject.Find("Canvas").transform.Find("behaviorThree");
         // 미사일이 발사되는 오브젝트 위치
         mmPos = transform.Find("magicPosition");
         // 프리팹에서 리소스를 불러옴
@@ -106,8 +108,8 @@ public class CharThreeScript : MonoBehaviour
         // 능력치
 
         // 현재체력, 최대체력
-        hp = 300.0f;
-        _maxHP = 300.0f;
+        hp = 1000.0f; 
+        _maxHP = 1000.0f;
 
         // 공격속도
         _atkSpeed = 1.0f;
@@ -134,13 +136,16 @@ public class CharThreeScript : MonoBehaviour
     {
         _CharThreeAni = GetComponent<Animator>();
         _moveSpeed = 2.0f;
-        gameCanvas = GameObject.Find("Canvas");
         damagePro = PlayerManager.instance.damageText;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (gameCanvas == null)
+            gameCanvas = PlayerManager.instance.gameCanvas;
+
+        _attackPoint = Random.Range(8, 14);
         // 단일 힐 쿨타임
         _healCoolTime += Time.deltaTime;
         if(_healCoolTime <= 2.0f)
@@ -183,14 +188,17 @@ public class CharThreeScript : MonoBehaviour
                 {
                     if (Monster != null)
                     {
-                        if (getDistance(Monster) <= 4.5f)
+                        if(Monster.transform.position.y <= 0.7f)
                         {
-                            transform.LookAt(Monster.transform);
-                            attackCoolTime(atkSpeed);
-                        }
-                        else
-                        {
-                            moveToTarget();
+                            if (getDistance(Monster) <= 4.5f)
+                            {
+                                transform.LookAt(Monster.transform);
+                                attackCoolTime(atkSpeed);
+                            }
+                            else
+                            {
+                                moveToTarget();
+                            }
                         }
                         // 캐릭터들의 체력이 70퍼센트 이하로 내려갔을때 힐
                         if ((PlayerManager.instance.charOneScriptPublic.oneHP / PlayerManager.instance.charOneScriptPublic.maxHP) * 100 <= 70.0f)
@@ -244,7 +252,8 @@ public class CharThreeScript : MonoBehaviour
     public void CreateHealText(Transform _charTransform, float _text)
     {
         instanceHealText = GameObject.Instantiate(HealText,
-            Camera.main.WorldToScreenPoint(new Vector3(_charTransform.position.x, _charTransform.position.y + 2.0f, _charTransform.position.z)),
+            Camera.main.WorldToScreenPoint(
+            new Vector3(_charTransform.position.x + Random.Range(-0.3f, 0.3f), _charTransform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), _charTransform.position.z + Random.Range(-0.3f, 0.3f))),
             Quaternion.identity).gameObject;
         instanceHealText.GetComponent<TextMeshProUGUI>().text = ((int)_text).ToString();
         instanceHealText.transform.SetParent(gameCanvas.transform);
@@ -280,13 +289,13 @@ public class CharThreeScript : MonoBehaviour
     // 캔버스 힐 UI 온 코드
     public void HealUIOn()
     {
-        HealUI.gameObject.SetActive(true);
+        WorldCanvasScript.instance.HealUI.gameObject.SetActive(true);
     }
 
     // 캔버스 힐 UI 오프코드
     public void HealUIOff()
     {
-        HealUI.gameObject.SetActive(false);
+        WorldCanvasScript.instance.HealUI.gameObject.SetActive(false);
     }
 
     public void HealOneTarget(int _charNum)
@@ -475,12 +484,10 @@ public class CharThreeScript : MonoBehaviour
             damagePro.GetComponent<TextMeshProUGUI>().text = mobOP.ToString();
             // 데미지텍스트 인스턴스화 - WorldToScreenPoint 함수를 통해 바라보는 화면에서 현재 트랜스폼 위쪽에 데미지 표시
             damageText = GameObject.Instantiate(damagePro,
-            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
             Quaternion.identity).gameObject;
             // 데미지텍스트의 부모를 캔버스로 지정(이작업을 해줘야 데미지가 보임)
             damageText.transform.SetParent(gameCanvas.transform);
-            // 0.5초 후에 없앰
-            Destroy(damageText, 0.5f);
             //데미지연산
             hp -= mobOP;
         }
@@ -490,10 +497,9 @@ public class CharThreeScript : MonoBehaviour
             middleBossOP = (int)mbHitScript.mbOP;
             damagePro.GetComponent<TextMeshProUGUI>().text = middleBossOP.ToString();
             damageText = GameObject.Instantiate(damagePro,
-            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
             Quaternion.identity).gameObject;
             damageText.transform.SetParent(gameCanvas.transform);
-            Destroy(damageText, 0.5f);
             hp -= middleBossOP;
         }
         else if (other.CompareTag("ShockWave"))
@@ -505,11 +511,43 @@ public class CharThreeScript : MonoBehaviour
             ShockWaveD = shockWaveScript.ShockWaveDamage;
             damagePro.GetComponent<TextMeshProUGUI>().text = ShockWaveD.ToString();
             damageText = GameObject.Instantiate(damagePro,
-            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 3.0f, transform.position.z)),
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
             Quaternion.identity).gameObject;
             damageText.transform.SetParent(gameCanvas.transform);
-            Destroy(damageText, 0.5f);
             hp -= ShockWaveD;
+        }
+        else if (other.CompareTag("BossHit"))
+        {
+            Debug.Log("boss hit");
+            bossHitScript = other.GetComponent<BossHitScript>();
+            BossOP = (int)bossHitScript.BossOP;
+            damagePro.GetComponent<TextMeshProUGUI>().text = BossOP.ToString();
+            damageText = GameObject.Instantiate(damagePro,
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
+            Quaternion.identity).gameObject;
+            damageText.transform.SetParent(gameCanvas.transform);
+            hp -= BossOP;
+        }
+        else if (other.CompareTag("Effect"))
+        {
+            redDragonScript = other.transform.root.GetComponentInChildren<RedDragonScript>();
+            Debug.Log(redDragonScript);
+            if (other.name.Equals("FlameThrowPoint"))
+            {
+                FlameOP = (int)redDragonScript.flameOP;
+                damagePro.GetComponent<TextMeshProUGUI>().text = FlameOP.ToString();
+                hp -= FlameOP;
+            }
+            else if (other.name.Equals("Meteor") || other.name.Equals("Explosion2"))
+            {
+                meteorOP = (int)redDragonScript.meteorOP;
+                damagePro.GetComponent<TextMeshProUGUI>().text = meteorOP.ToString();
+                hp -= meteorOP;
+            }
+            damageText = GameObject.Instantiate(damagePro,
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
+            Quaternion.identity).gameObject;
+            damageText.transform.SetParent(gameCanvas.transform);
         }
     }
 
@@ -576,7 +614,7 @@ public class CharThreeScript : MonoBehaviour
     public void CreateStunText()
     {
         instanceStunText = GameObject.Instantiate(PlayerManager.instance.stunText, 
-            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
             Quaternion.identity);
         instanceStunText.transform.SetParent(gameCanvas.transform);
         Destroy(instanceStunText, 2.0f);

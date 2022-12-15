@@ -14,13 +14,13 @@ public class ArrowScript : MonoBehaviour
     void Start()
     {
         charTwoScript = PlayerManager.instance.charTwoScriptPublic;
+        Destroy(gameObject, 5.0f);
     }
 
     // Update is called once per frame
     void Update()
     {
         _arrowOP = charTwoScript.attackPoint;
-        Destroy(gameObject,5.0f);
     }
 
     private void OnTriggerEnter(Collider other)

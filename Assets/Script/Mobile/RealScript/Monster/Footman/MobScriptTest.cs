@@ -146,7 +146,7 @@ public class MobScriptTest : MonoBehaviour
         //&& PlayerManager.instance.playerAniController.GetInteger("aniInt") == 2)
         {
             // 데미지 텍스트 띄우는코드 - 무기의 이름에 따라 저장해주는 데미지 값이 달라져야함
-            if (other.name.Equals("THS07_Sword"))
+            if (other.name.Equals(PlayerManager.instance.charOneScriptPublic.weaponScriptPublic.name))
             {
                 weaponScript = other.GetComponent<WeaponScript>();
                 TwoHandSwordOP = ((int)weaponScript.weaponOP);
@@ -160,10 +160,10 @@ public class MobScriptTest : MonoBehaviour
                 meleeDamage.GetComponent<TextMeshProUGUI>().text = TwoHandSwordOP.ToString();
                 HP -= TwoHandSwordOP;
             }
-            damageText = GameObject.Instantiate(meleeDamage, Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+            damageText = GameObject.Instantiate(meleeDamage, 
+                Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
                 Quaternion.identity).gameObject;
             damageText.transform.SetParent(gameCanvas.transform);
-            Destroy(damageText, 0.5f);
         }
         // 화살이 닿았을 때
         else if (other.transform.CompareTag("Arrow"))
@@ -172,7 +172,6 @@ public class MobScriptTest : MonoBehaviour
             ArrowOP = ((int)arrowScript.arrowOP);
             PrintDamage(ArrowOP, "archer");
             HP -= ArrowOP;
-            Destroy(damageText, 0.5f);
         }
         // 매직미사일이 닿았을 때
         else if (other.transform.CompareTag("MagicMissile"))
@@ -181,7 +180,6 @@ public class MobScriptTest : MonoBehaviour
             MagicMissileOP = ((int)magicMissileScript.magicMissileOP);
             PrintDamage(MagicMissileOP, "range");
             HP -= MagicMissileOP;
-            Destroy(damageText, 0.5f);
         }
 
         // 도발에 닿았을 때
@@ -195,13 +193,15 @@ public class MobScriptTest : MonoBehaviour
     public void PrintDamage(int _damage, string _name)
     {
         rangeDamage.GetComponent<TextMeshProUGUI>().text = _damage.ToString();
-        damageText = GameObject.Instantiate(rangeDamage, Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+        damageText = GameObject.Instantiate(rangeDamage, 
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
             Quaternion.identity).gameObject;
         damageText.transform.SetParent(gameCanvas.transform);
         if (_name.Equals("Magician"))
         {
             magicDamage.GetComponent<TextMeshProUGUI>().text = _damage.ToString();
-            damageText = GameObject.Instantiate(magicDamage, Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+            damageText = GameObject.Instantiate(magicDamage, 
+                Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
                 Quaternion.identity).gameObject;
             damageText.transform.SetParent(gameCanvas.transform);
         }

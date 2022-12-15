@@ -14,13 +14,13 @@ public class MagicMissileScript : MonoBehaviour
     void Start()
     {
         charThreeScript = PlayerManager.instance.charThreeScriptPublic;
+        Destroy(gameObject, 5.0f);
     }
 
     // Update is called once per frame
     void Update()
     {
         _magicMissileOP = charThreeScript.attackPoint;
-        Destroy(gameObject, 5.0f);
     }
 
     private void OnTriggerEnter(Collider other)

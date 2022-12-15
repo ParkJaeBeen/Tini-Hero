@@ -21,13 +21,14 @@ public class WeaponScript : MonoBehaviour
 
     private void Awake()
     {
-        _enableTime = 0.35f;
+        _enableTime = 1.0f;
     }
     // Start is called before the first frame update
     void Start()
     {
         charoneScript = PlayerManager.instance.charOneScriptPublic;
         weaponCollider = GetComponent<CapsuleCollider>();
+        Debug.Log(weaponCollider.name);
     }
 
     // Update is called once per frame
@@ -48,7 +49,9 @@ public class WeaponScript : MonoBehaviour
     IEnumerator attack()
     {
         weaponCollider.enabled = true;
+        Debug.Log("true");
         yield return new WaitForSeconds(enableTime);
         weaponCollider.enabled = false;
+        Debug.Log("false");
     }
 }

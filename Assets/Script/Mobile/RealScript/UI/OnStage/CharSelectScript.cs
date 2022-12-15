@@ -21,9 +21,9 @@ public class CharSelectScript : MonoBehaviour
         ch2Image = GameObject.Find("ch2").transform.Find("ch2Image").GetComponent<Image>();
         ch3Image = GameObject.Find("ch3").transform.Find("ch3Image").GetComponent<Image>();
         // 
-        meleeImg = Resources.Load<Sprite>("Icon/c1");
-        BowImg = Resources.Load<Sprite>("Icon/c2");
-        HealImg = Resources.Load<Sprite>("Icon/c3");
+        meleeImg = Resources.Load<Sprite>("Icon/upg_shield");
+        BowImg = Resources.Load<Sprite>("Icon/upg_bow");
+        HealImg = Resources.Load<Sprite>("Icon/upg_wand");
     }
     // Start is called before the first frame update
     void Start()

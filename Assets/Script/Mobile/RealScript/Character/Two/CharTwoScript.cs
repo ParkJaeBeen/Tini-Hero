@@ -13,6 +13,7 @@ public class CharTwoScript : MonoBehaviour
     float _multiShotCTText, _ultCoolTimeText;
     int mobOP;
     int middleBossOP;
+    int BossOP;
     int ShockWaveD;
     public GameObject Arrow, resourceArrow, resourceMSarrow, resourceUltEffect, instanceArrow, instanceUltEffect;
     public Transform arrowPos;
@@ -24,10 +25,14 @@ public class CharTwoScript : MonoBehaviour
     GameObject Monster;
     GameObject instanceStunText;
     MBHitScript mbHitScript;
+    BossHitScript bossHitScript;
     ShockWaveScript shockWaveScript;
-    Transform rangerUI;
     bool StunTrigger;
     bool _multiShotTrigger, _ultTrigger;
+    RedDragonScript redDragonScript;
+    int FlameOP;
+    private int meteorOP;
+
     public float attackPoint
     {
         get { return _attackPoint; }
@@ -106,8 +111,8 @@ public class CharTwoScript : MonoBehaviour
         CharTwoAni = GetComponent<Animator>();
 
         // 현재체력, 최대체력
-        hp = 300.0f;
-        _maxHP = 300.0f;
+        hp = 1000.0f;
+        _maxHP = 1000.0f;
 
         maxOp = 18;
         minOp = 23;
@@ -122,19 +127,20 @@ public class CharTwoScript : MonoBehaviour
         _ultCoolTimeText = 15.00001f;
         _ultTrigger = false;
 
-        rangerUI = GameObject.Find("Canvas").transform.Find("behaviorTwo");
     }
     // Start is called before the first frame update
     void Start()
     {
         _moveSpeed = 3.5f;
         damagePro = PlayerManager.instance.damageText;
-        gameCanvas = GameObject.Find("Canvas");
     }
 
     // Update is called once per frame
     void Update()
     {
+        if(gameCanvas == null)
+            gameCanvas = PlayerManager.instance.gameCanvas;
+
         _atkCoolTime += Time.deltaTime;
 
         multiShotCoolTime += Time.deltaTime;
@@ -169,17 +175,21 @@ public class CharTwoScript : MonoBehaviour
                 {
                     if (Monster != null)
                     {
-                        if (getDistance(Monster) <= 7.0f)
+                        if (Monster.transform.position.y <= 0.7f)
                         {
-                            transform.LookAt(Monster.transform);
-                            attackCoolTime(atkSpeed);
-                            if (multiShotCoolTime >= 7.0f)
-                                CreateMultiShot();
+                            if (getDistance(Monster) <= 7.0f)
+                            {
+                                transform.LookAt(Monster.transform);
+                                attackCoolTime(atkSpeed);
+                                if (multiShotCoolTime >= 7.0f)
+                                    CreateMultiShot();
+                            }
+                            else
+                            {
+                                moveToTarget();
+                            }
                         }
-                        else
-                        {
-                            moveToTarget();
-                        }
+                            
                     }
                     else if (Monster == null)
                     {
@@ -199,12 +209,12 @@ public class CharTwoScript : MonoBehaviour
 
     public void RangerUIOn()
     {
-        rangerUI.gameObject.SetActive(true);
+        WorldCanvasScript.instance.rangerUI.gameObject.SetActive(true);
     }
 
     public void RangerUIOff()
     {
-        rangerUI.gameObject.SetActive(false);
+        WorldCanvasScript.instance.rangerUI.gameObject.SetActive(false);
     }
 
     public void attackCoolTime(float _ad)
@@ -301,12 +311,10 @@ public class CharTwoScript : MonoBehaviour
             damagePro.GetComponent<TextMeshProUGUI>().text = mobOP.ToString();
             // 데미지텍스트 인스턴스화 - WorldToScreenPoint 함수를 통해 바라보는 화면에서 현재 트랜스폼 위쪽에 데미지 표시
             damageText = GameObject.Instantiate(damagePro,
-            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
             Quaternion.identity).gameObject;
             // 데미지텍스트의 부모를 캔버스로 지정(이작업을 해줘야 데미지가 보임)
             damageText.transform.SetParent(gameCanvas.transform);
-            // 0.5초 후에 없앰
-            Destroy(damageText, 0.5f);
             //데미지연산
             hp -= mobOP;
         }
@@ -316,7 +324,7 @@ public class CharTwoScript : MonoBehaviour
             middleBossOP = (int)mbHitScript.mbOP;
             damagePro.GetComponent<TextMeshProUGUI>().text = middleBossOP.ToString();
             damageText = GameObject.Instantiate(damagePro,
-            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
             Quaternion.identity).gameObject;
             damageText.transform.SetParent(gameCanvas.transform);
             Destroy(damageText, 0.5f);
@@ -331,11 +339,43 @@ public class CharTwoScript : MonoBehaviour
             ShockWaveD = shockWaveScript.ShockWaveDamage;
             damagePro.GetComponent<TextMeshProUGUI>().text = ShockWaveD.ToString();
             damageText = GameObject.Instantiate(damagePro,
-            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 3.0f, transform.position.z)),
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
             Quaternion.identity).gameObject;
             damageText.transform.SetParent(gameCanvas.transform);
-            Destroy(damageText, 0.5f);
             hp -= ShockWaveD;
+        }
+        else if (other.CompareTag("BossHit"))
+        {
+            Debug.Log("boss hit");
+            bossHitScript = other.GetComponent<BossHitScript>();
+            BossOP = (int)bossHitScript.BossOP;
+            damagePro.GetComponent<TextMeshProUGUI>().text = BossOP.ToString();
+            damageText = GameObject.Instantiate(damagePro,
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
+            Quaternion.identity).gameObject;
+            damageText.transform.SetParent(gameCanvas.transform);
+            hp -= BossOP;
+        }
+        else if (other.CompareTag("Effect"))
+        {
+            redDragonScript = other.transform.root.GetComponentInChildren<RedDragonScript>();
+            Debug.Log(redDragonScript);
+            if (other.name.Equals("FlameThrowPoint"))
+            {
+                FlameOP = (int)redDragonScript.flameOP;
+                damagePro.GetComponent<TextMeshProUGUI>().text = FlameOP.ToString();
+                hp -= FlameOP;
+            }
+            else if (other.name.Equals("Meteor") || other.name.Equals("Explosion2"))
+            {
+                meteorOP = (int)redDragonScript.meteorOP;
+                damagePro.GetComponent<TextMeshProUGUI>().text = meteorOP.ToString();
+                hp -= meteorOP;
+            }
+            damageText = GameObject.Instantiate(damagePro,
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
+            Quaternion.identity).gameObject;
+            damageText.transform.SetParent(gameCanvas.transform);
         }
     }
 
@@ -402,7 +442,7 @@ public class CharTwoScript : MonoBehaviour
     public void CreateStunText()
     {
         instanceStunText = GameObject.Instantiate(PlayerManager.instance.stunText,
-            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+            Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
             Quaternion.identity);
         instanceStunText.transform.SetParent(gameCanvas.transform);
         Destroy(instanceStunText, 2.0f);

@@ -8,12 +8,10 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager instance;
     public Dictionary<string, Transform> playerTransforms;
     Vector3 movingPoint, lastPos, dir;
-    public JoyStickTestM joystick;
+
     public Transform _playerTransform;
-    CapsuleCollider _playerWeapon;
     float _inputX, _inputZ, moveSpeed, rotateSpeed, _attackCount, _attakDelay, _attakPoint, _healCount;
     public Animator playerAniController;
-    WeaponScript weaponScript;
     CharOneScript charOneScript;
     CharTwoScript charTwoScript;
     CharThreeScript charThreeScript;
@@ -22,7 +20,8 @@ public class PlayerManager : MonoBehaviour
     TextMeshProUGUI _damageText;
     GameObject _stunText;
     public bool gatherTrigger;
-    Button gatherOnBt, gatherOffBt;
+    public GameObject gameCanvas;
+    //Button gatherOnBt, gatherOffBt;
     public Transform playerTransform
     {
         get { return _playerTransform; }
@@ -87,11 +86,10 @@ public class PlayerManager : MonoBehaviour
         {
             playerTransforms.Add("Character_" + (i + 1), transform.GetChild(i));
         }
-        joystick = GameObject.Find("JSBackground").GetComponent<JoyStickTestM>();
+        
         _playerTransform = transform.GetChild(0);
         playerAniController = _playerTransform.GetComponent<Animator>();
         attakPoint = _playerTransform.GetComponent<CharOneScript>().attackPoint;
-        weaponScript = GetComponentInChildren<WeaponScript>();
         charOneScript = GetComponentInChildren<CharOneScript>();
         charTwoScript = GetComponentInChildren<CharTwoScript>();
         charThreeScript = GetComponentInChildren<CharThreeScript>();
@@ -103,8 +101,8 @@ public class PlayerManager : MonoBehaviour
         _damageText = Resources.Load<TextMeshProUGUI>("Prefabs/DamageTextPro");
         _stunText = Resources.Load<GameObject>("Prefabs/StunText");
 
-        gatherOnBt = GameObject.Find("Canvas").transform.Find("gatherOnBT").GetComponent<Button>();
-        gatherOffBt = GameObject.Find("Canvas").transform.Find("gatherOffBT").GetComponent<Button>();
+        //gatherOnBt = GameObject.Find("Canvas").transform.Find("gatherOnBT").GetComponent<Button>();
+        //gatherOffBt = GameObject.Find("Canvas").transform.Find("gatherOffBT").GetComponent<Button>();
     }
     // Start is called before the first frame update
     void Start()
@@ -117,8 +115,8 @@ public class PlayerManager : MonoBehaviour
     {
         if (!GameManagerScript.instance.isGameClear)
         {
-            _inputX = joystick.inputHorizontal();
-            _inputZ = joystick.inputVertical();
+            _inputX = WorldCanvasScript.instance.joystick.inputHorizontal();
+            _inputZ = WorldCanvasScript.instance.joystick.inputVertical();
 
             dir = new Vector3(_inputX, 0, _inputZ);
 
@@ -147,10 +145,6 @@ public class PlayerManager : MonoBehaviour
                         }
                         Taunt();
                         CharOneUlt();
-                        if (Input.GetKeyDown(KeyCode.M))
-                        {
-                            charOneScript.TestCoolTime = 10.0f;
-                        }
                     }
                     else if (charThreeScript.StunTriggerPublic)
                     {
@@ -206,15 +200,15 @@ public class PlayerManager : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.G))
                 {
                     gatherTrigger = true;
-                    gatherOnBt.gameObject.SetActive(true);
-                    gatherOffBt.gameObject.SetActive(false);
+                    WorldCanvasScript.instance.gatherOnBt.gameObject.SetActive(true);
+                    WorldCanvasScript.instance.gatherOffBt.gameObject.SetActive(false);
                 }
 
                 if (Input.GetKeyDown(KeyCode.H))
                 {
                     gatherTrigger = false;
-                    gatherOnBt.gameObject.SetActive(false);
-                    gatherOffBt.gameObject.SetActive(true);
+                    WorldCanvasScript.instance.gatherOnBt.gameObject.SetActive(false);
+                    WorldCanvasScript.instance.gatherOffBt.gameObject.SetActive(true);
                     // 버튼은 enabled 가 아니라 interactable 라는 걸로 온오프 해주어야함
                 }
 
@@ -231,15 +225,15 @@ public class PlayerManager : MonoBehaviour
     public void GatherOff()
     {
         gatherTrigger = false;
-        gatherOnBt.gameObject.SetActive(true);
-        gatherOffBt.gameObject.SetActive(false);
+        WorldCanvasScript.instance.gatherOnBt.gameObject.SetActive(true);
+        WorldCanvasScript.instance.gatherOffBt.gameObject.SetActive(false);
     }
 
     public void GatherOn()
     {
         gatherTrigger = true;
-        gatherOnBt.gameObject.SetActive(false);
-        gatherOffBt.gameObject.SetActive(true);
+        WorldCanvasScript.instance.gatherOnBt.gameObject.SetActive(false);
+        WorldCanvasScript.instance.gatherOffBt.gameObject.SetActive(true);
     }
 
     public void MoveCharacter(Transform _playerT)

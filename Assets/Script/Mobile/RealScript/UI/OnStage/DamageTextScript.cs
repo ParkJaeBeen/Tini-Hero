@@ -12,6 +12,7 @@ public class DamageTextScript : MonoBehaviour
     void Start()
     {
         damageText = GetComponent<TextMeshProUGUI>();
+        Destroy(gameObject, 0.5f);
     }
 
     // Update is called once per frame

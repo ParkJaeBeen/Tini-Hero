@@ -16,7 +16,7 @@ public class SceneLoad : MonoBehaviour
     void Start()
     {
         Debug.Log("Start");
-        StartCoroutine(LoadScene());
+        StartCoroutine(LoadScene(GameManagerScript.instance.sceneName));
     }
 
     // Update is called once per frame
@@ -25,11 +25,11 @@ public class SceneLoad : MonoBehaviour
         
     }
 
-    IEnumerator LoadScene()
+    IEnumerator LoadScene(string _sceneName)
     {
         Debug.Log("loading");
         yield return null;
-        AsyncOperation op = SceneManager.LoadSceneAsync("MonsterTest");
+        AsyncOperation op = SceneManager.LoadSceneAsync(_sceneName);
         op.allowSceneActivation = false;
 
         while (!op.isDone)

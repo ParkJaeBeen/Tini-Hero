@@ -17,8 +17,6 @@ public class MiddleBossScript : MonoBehaviour
     // 현재 지정된 캐릭터의 트랜스폼, 게임오브젝트
     Transform playerTransform;
     GameObject playerGO;
-    // 중간보스 리지드바디
-    Rigidbody rb;
     // 물리, 마법, 원거리 데미지텍스트리소스
     TextMeshProUGUI meleeDamage, rangeDamage, magicDamage;
     // 캔버스와 데미지텍스트(실제로 캔버스에 그려지는 텍스트)
@@ -82,7 +80,7 @@ public class MiddleBossScript : MonoBehaviour
         // 충격파 트리거
         SWTrigger = false;
         // 중간보스의 체력
-        HP = 1400.0f;
+        HP = 2000.0f;
         _maxHP = 2500.0f;
         // 충격파 쿨타임
         shockWaveCoolTime = 101.0f;
@@ -101,9 +99,9 @@ public class MiddleBossScript : MonoBehaviour
         // 공격판정 컴포넌트 스크립트
         mbHitScript = GetComponentInChildren<MBHitScript>();
         playerTransform = PlayerManager.instance.playerTransform;
-        rb = GetComponent<Rigidbody>();
         meleeDamage = MiddleBossPoolScript.instance.meleeDamageText;
         rangeDamage = MiddleBossPoolScript.instance.rangeDamageText;
+        magicDamage = MiddleBossPoolScript.instance.magicDamageText;
         gameCanvas = GameObject.Find("Canvas");
         for (int i = 0; i < PlayerManager.instance.playerTransforms.Count; i++)
         {
@@ -211,10 +209,9 @@ public class MiddleBossScript : MonoBehaviour
                 meleeDamage.GetComponent<TextMeshProUGUI>().text = TwoHandSwordOP.ToString();
                 HP -= TwoHandSwordOP;
             }
-            damageText = GameObject.Instantiate(meleeDamage, Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+            damageText = GameObject.Instantiate(meleeDamage, Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
                 Quaternion.identity).gameObject;
             damageText.transform.SetParent(gameCanvas.transform);
-            Destroy(damageText, 0.5f);
         }
         // 화살이 닿았을 때
         else if (other.transform.CompareTag("Arrow"))
@@ -223,17 +220,15 @@ public class MiddleBossScript : MonoBehaviour
             ArrowOP = ((int)arrowScript.arrowOP);
             PrintDamage(ArrowOP, "archer");
             HP -= ArrowOP;
-            Destroy(damageText, 0.5f);
         }
         // 매직미사일이 닿았을 때
         else if (other.transform.CompareTag("MagicMissile"))
         {
             magicMissileScript = other.GetComponent<MagicMissileScript>();
             MagicMissileOP = ((int)magicMissileScript.magicMissileOP);
-            PrintDamage(MagicMissileOP, "range");
+            PrintDamage(MagicMissileOP, "Magician");
             Debug.Log("매직미사일 = "+MagicMissileOP);
             HP -= MagicMissileOP;
-            Destroy(damageText, 0.5f);
         }
 
         // 도발에 닿았을 때
@@ -247,13 +242,13 @@ public class MiddleBossScript : MonoBehaviour
     public void PrintDamage(int _damage, string _name)
     {
         rangeDamage.GetComponent<TextMeshProUGUI>().text = _damage.ToString();
-        damageText = GameObject.Instantiate(rangeDamage, Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+        damageText = GameObject.Instantiate(rangeDamage, Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
             Quaternion.identity).gameObject;
         damageText.transform.SetParent(gameCanvas.transform);
         if (_name.Equals("Magician"))
         {
             magicDamage.GetComponent<TextMeshProUGUI>().text = _damage.ToString();
-            damageText = GameObject.Instantiate(magicDamage, Camera.main.WorldToScreenPoint(new Vector3(transform.position.x, transform.position.y + 2.0f, transform.position.z)),
+            damageText = GameObject.Instantiate(magicDamage, Camera.main.WorldToScreenPoint(new Vector3(transform.position.x + Random.Range(-0.3f, 0.3f), transform.position.y + 2.0f + Random.Range(-0.3f, 0.3f), transform.position.z + Random.Range(-0.3f, 0.3f))),
                 Quaternion.identity).gameObject;
             damageText.transform.SetParent(gameCanvas.transform);
         }

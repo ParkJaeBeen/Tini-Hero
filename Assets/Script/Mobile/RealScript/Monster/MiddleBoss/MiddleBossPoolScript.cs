@@ -45,6 +45,7 @@ public class MiddleBossPoolScript : MonoBehaviour
         MiddleBossResource = Resources.Load<GameObject>("Prefabs/Polyart_Golem");
         _meleeDamageText = Resources.Load<TextMeshProUGUI>("Prefabs/DamageTextProOrange");
         _rangeDamageText = Resources.Load<TextMeshProUGUI>("Prefabs/DamageTextProBlue");
+        _magicDamageText = Resources.Load<TextMeshProUGUI>("Prefabs/DamageTextProBlue");
         gameCanvas = GameObject.Find("Canvas");
         warningEffect = gameCanvas.transform.Find("warningEffect").GetComponent<WarningEffectScript>();
         warningText = gameCanvas.transform.Find("warningText").GetComponent<WarningTextScript>();
